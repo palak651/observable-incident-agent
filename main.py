@@ -51,12 +51,21 @@ def load_trace(data):
         s for s in trace.spans if s["name"].startswith("invoke_agent ")
     )
 
+    
     trace.tool_spans = {
-        s["attributes"][0]["value"]["stringValue"]: s
-        for s in trace.spans
-        if s["name"].startswith("execute_tool ")
-        and any(a["key"] == "ga5.action.id" for a in s["attributes"])
-    }
+    next(
+        a["value"]["stringValue"]
+        for a in s["attributes"]
+        if a["key"] == "ga5.action.id"
+    ): s
+    for s in trace.spans
+    if s["name"].startswith("execute_tool ")
+    and any(
+        a["key"] == "ga5.action.id"
+        for a in s["attributes"]
+    )
+}
+
     trace.client_spans = {
         s["spanId"]: s for s in trace.spans
         if s["name"].startswith("POST tool/")
